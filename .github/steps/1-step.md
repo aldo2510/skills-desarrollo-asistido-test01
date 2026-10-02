@@ -41,24 +41,37 @@ pytest -q
 
 Resultado esperado: las pruebas existentes pasan.
 
-### 3. Copia y pega este prompt en Copilot Chat
+### 3. Compara el análisis con Copilot
+
+Ahora utiliza Copilot para comprobar si tu comprensión del proyecto coincide con la interpretación de la IA.
+
+Copia y pega este prompt en Copilot Chat:
 
 ```text
-Analiza este proyecto FastAPI como un ingeniero senior. No modifiques ningún archivo.
+Analiza este proyecto FastAPI como un ingeniero senior.
 
-Explícame:
-1. La arquitectura y responsabilidad de cada archivo.
-2. Los endpoints existentes, método HTTP, entrada y respuesta.
-3. Los modelos Task y TaskCreate y sus campos.
-4. Cómo se almacena actualmente la información.
-5. Cómo se ejecutan las pruebas.
-6. El flujo completo de POST /tasks.
-7. El flujo completo de PATCH /tasks/{task_id}.
-8. Al menos 2 riesgos o decisiones técnicas que debería conocer antes de modificar el proyecto.
+No modifiques ningún archivo.
 
-Termina con una sección llamada "Lo que Copilot dijo vs. lo que debo verificar" con al menos 3 verificaciones concretas.
-No escribas código ni hagas cambios.
+Resume únicamente:
+1. La responsabilidad de app/main.py.
+2. Los endpoints disponibles.
+3. Los modelos Task y TaskCreate.
+4. Cómo se almacenan las tareas.
+5. Cómo funcionan las pruebas.
+6. Dos riesgos técnicos que deberían considerarse antes de modificar el proyecto.
+
+No escribas código y no propongas cambios.
+
+Al final, indica:
+- 3 afirmaciones que debería verificar directamente en el repositorio.
+- 1 posible interpretación que podría ser incorrecta.
 ```
+
+Lee la respuesta de Copilot y compárala con el código real del repositorio.
+
+**No necesitas copiar la respuesta de Copilot al documento.**
+
+El objetivo es observar si la explicación de la IA coincide con lo que realmente existe en el código.
 
 ### 4. Crea el documento
 
