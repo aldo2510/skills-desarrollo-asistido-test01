@@ -1,34 +1,69 @@
-## Step 7: Haz code review asistido por IA
+# Step 7 — Documenta decisiones técnicas
 
-### Teoría
-Una IA puede revisar un diff, pero el reviewer humano decide si una observación es válida. El objetivo es detectar cambios no relacionados, tests débiles y riesgos.
+## Teoría
+Una decisión técnica debe conservar contexto: problema, alternativas, decisión y consecuencias.
 
-### Copia y pega
-```text
-Revisa el Pull Request actual como reviewer senior.
+## 1. Prompt
+~~~text
+Analiza los cambios realizados en este ejercicio.
+
 No modifiques archivos.
-Busca cambios no relacionados, tests débiles, validaciones faltantes, comportamiento inesperado y documentación sin evidencia.
-Devuelve los hallazgos y su evidencia.
-```
 
-Revisa cada hallazgo contra el diff. Corrige los problemas reales y vuelve a ejecutar `pytest -q`.
+Identifica las decisiones técnicas más importantes relacionadas con:
+- modelado de priority;
+- validación;
+- pruebas;
+- generación de ID;
+- compatibilidad.
 
-Crea `docs/code-review.md`:
+Para cada una explica alternativas, beneficios, riesgos y consecuencia.
+~~~
 
-```markdown
-# Code Review
-## Hallazgos de IA
-- ...
-## Hallazgos confirmados
-- ...
-## Hallazgos rechazados
-- ...
-## Correcciones realizadas
-- ...
+## 2. Crea docs/technical-decisions.md
+~~~markdown
+# Technical Decisions
+
+## Decisión 1 — Validación de priority
+**Decisión:** Validar priority en el modelo de entrada.
+
+**Motivo:** La regla forma parte del contrato de la API.
+
+**Alternativa:** Validación manual dentro del endpoint.
+
+**Consecuencia:** La validación queda centralizada.
+
+## Decisión 2 — Cobertura de pruebas
+**Decisión:** Cubrir valores válidos, inválidos, ausencia del campo y regresiones.
+
+**Motivo:** El nuevo campo cambia el contrato.
+
+## Decisión 3 — Generación de ID
+**Decisión:** Manejar explícitamente el caso de colección vacía.
+
+**Motivo:** Evitar una excepción cuando no existen tareas.
+
 ## Evidencia
-...
-```
+~~~bash
+git diff
+pytest -q
+~~~
+~~~
 
-Haz commit y push.
+## 3. Revisión con Copilot
+~~~text
+Revisa docs/technical-decisions.md contra el código actual.
 
-**Tiempo: 8-10 min.**
+No modifiques archivos.
+
+Indica cualquier decisión que no tenga evidencia suficiente o que describa un comportamiento inexistente.
+~~~
+
+## 4. Validación y commit
+~~~bash
+test -f docs/technical-decisions.md
+pytest -q
+git add docs/technical-decisions.md
+git commit -m "docs: record technical decisions"
+git push
+~~~
+**Tiempo sugerido: 8–10 min.**
