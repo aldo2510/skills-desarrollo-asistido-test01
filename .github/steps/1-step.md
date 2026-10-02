@@ -75,11 +75,9 @@ El objetivo es observar si la explicación de la IA coincide con lo que realment
 
 ### 4. Crea el documento
 
-Crea `docs/project-analysis.md`.
+Crea el archivo `docs/project-analysis.md`.
 
-Para que todos los participantes puedan avanzar sin depender de que Copilot genere una respuesta específica, **no necesitas esperar a Copilot para completar este documento**.
-
-Copia y pega **exactamente** el siguiente contenido en `docs/project-analysis.md`:
+No necesitas inventar el contenido ni completar campos manualmente. **Copia y pega exactamente el bloque siguiente en el archivo**:
 
 ```markdown
 # Project Analysis
@@ -89,7 +87,7 @@ Copia y pega **exactamente** el siguiente contenido en `docs/project-analysis.md
 | Archivo | Responsabilidad |
 |---|---|
 | app/main.py | Contiene la aplicación FastAPI, los modelos Task y TaskCreate, la lista en memoria y los endpoints de la API. |
-| app/__init__.py | Identifica app como un paquete Python. |
+| app/__init__.py | Identifica `app` como un paquete Python. |
 | tests/test_api.py | Contiene las pruebas automatizadas de los endpoints principales. |
 | requirements.txt | Define las dependencias Python necesarias para ejecutar la aplicación y sus pruebas. |
 | pytest.ini | Configura pytest para incluir el directorio raíz del proyecto en el path de importación. |
@@ -135,17 +133,10 @@ Comando utilizado:
 pytest -q
 ```
 
-Resultado inicial esperado:
+Resultado esperado:
 
 ```text
 4 passed
-```
-
-Si el entorno acaba de ser actualizado, primero ejecuta:
-
-```bash
-git pull origin main
-pytest -q
 ```
 
 ## 6. Riesgos o decisiones técnicas
@@ -157,7 +148,7 @@ pytest -q
 
 ## 7. Lo que Copilot dijo vs. lo que verifiqué
 
-En este laboratorio la respuesta de Copilot es un apoyo, no un requisito para completar el ejercicio.
+La respuesta de Copilot se utilizó como apoyo para comprender el proyecto y se contrastó con el código real del repositorio.
 
 | Afirmación | Cómo la verifiqué | Resultado |
 |---|---|---|
@@ -173,8 +164,29 @@ En este laboratorio la respuesta de Copilot es un apoyo, no un requisito para co
 
 ## 9. Pregunta técnica abierta
 
-- ¿Qué cambios serían necesarios para agregar un nuevo campo `priority` a las tareas sin romper los endpoints ni las pruebas existentes?
+¿Qué cambios serían necesarios para agregar un nuevo campo `priority` a las tareas sin romper los endpoints ni las pruebas existentes?
 ```
+
+Después de pegarlo, guarda el archivo.
+
+### 5. Verificación final
+
+Ejecuta:
+
+```bash
+test -f docs/project-analysis.md
+pytest -q
+```
+
+Si ambos comandos terminan correctamente, haz commit y push:
+
+```bash
+git add docs/project-analysis.md
+git commit -m "docs: analyze project structure"
+git push
+```
+
+**Resultado del Step:** tendrás un análisis documentado del proyecto y habrás comprobado que una explicación generada por IA debe contrastarse con el código fuente antes de aceptarla como válida.
 
 ### 5. Verificación final
 
