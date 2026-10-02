@@ -1,60 +1,79 @@
-## Step 5: Depura un fallo real
+# Step 5 — Prepara el Pull Request
 
-### Teoría
-Debugging asistido por IA debe seguir evidencia: síntoma → reproducción → causa raíz → corrección → regresión.
+## Teoría
+Un PR debe permitir que otra persona entienda qué cambió, por qué cambió y cómo verificarlo.
 
-### Copia y pega
-```text
-Analiza create_task en app/main.py.
-No corrijas todavía.
-Explica qué ocurre si tasks está vacía y genera una prueba de regresión en tests/test_empty_tasks.py.
-```
+## 1. Prompt exacto
+~~~text
+Revisa git diff y el requerimiento original.
 
-Después:
+Genera una descripción de Pull Request en español con:
+1. objetivo;
+2. cambios;
+3. pruebas;
+4. riesgos;
+5. cómo validar;
+6. rollback.
 
-```text
-Implementa tests/test_empty_tasks.py para reproducir el fallo.
-No corrijas la implementación todavía.
-Ejecuta esa prueba y muestra el fallo.
-```
+No modifiques archivos.
+~~~
 
-Después:
+## 2. Crea docs/pr-description.md
+~~~markdown
+# Pull Request
 
-```text
-Analiza el fallo.
-No modifiques código.
-Explica síntoma, causa raíz, dos alternativas y evidencia.
-```
+## Objetivo
+Agregar priority a las tareas sin romper la API existente.
 
-Finalmente:
+## Cambios
+- Se incorporó priority al modelo de tarea.
+- Se incorporó priority al modelo de creación.
+- Se actualizaron los endpoints necesarios.
+- Se agregaron pruebas.
+- Se documentó una corrección de generación de ID.
 
-```text
-Corrige únicamente el bug identificado.
-Ejecuta primero la regresión y luego pytest -q.
-Muestra el diff.
-```
+## Pruebas
+~~~bash
+pytest -q
+~~~
 
-### Documenta
-Crea `docs/debugging-notes.md`:
+## Riesgos
+- Clientes antiguos que no envíen priority.
+- Cambios de contrato que deben verificarse antes del despliegue.
 
-```markdown
-# Debugging Notes
-## Síntoma
-...
-## Reproducción
-...
-## Causa raíz
-...
-## Hipótesis descartadas
-...
-## Alternativas
-...
-## Corrección
-...
-## Evidencia
-...
-```
+## Validación
+Revisar git diff y ejecutar toda la suite.
 
-Haz commit y push.
+## Rollback
+Revertir el commit del cambio y ejecutar pytest.
+~~~
 
-**Tiempo: 12-15 min.**
+## 3. Crea una rama
+~~~bash
+git checkout -b feat/task-priority
+git status
+~~~
+
+Si tus cambios ya están en main, crea la rama antes de continuar y asegúrate de que el PR se origine desde esa rama.
+
+## 4. Commit y push
+~~~bash
+git add .
+git commit -m "feat: task priority and validation"
+git push -u origin feat/task-priority
+~~~
+
+## 5. Abre el Pull Request
+Crea un PR hacia main usando docs/pr-description.md como descripción.
+
+No hagas merge.
+
+## 6. Verificación
+~~~bash
+test -f docs/pr-description.md
+test -f docs/debugging-notes.md
+test -f tests/test_empty_tasks.py
+pytest -q
+~~~
+
+**Tiempo sugerido: 8–10 min.**
