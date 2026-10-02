@@ -1,37 +1,60 @@
-## Step 8: Documenta decisiones técnicas
+# Step 8 — Revisa el PR como un equipo técnico
 
-### Teoría
-La documentación técnica conserva el razonamiento detrás del cambio. Esto es especialmente importante con IA porque el código puede generarse rápidamente, pero las decisiones siguen necesitando trazabilidad.
+## Teoría
+La revisión debe combinar requerimiento, código, pruebas y documentación.
 
-### Copia y pega
-```text
-Analiza los documentos y cambios del ejercicio.
-No modifiques código.
-Identifica las 3 decisiones técnicas más importantes, los riesgos asociados y qué decisiones requirieron criterio humano.
-```
+## 1. Prompt
+~~~text
+Realiza una revisión integral del Pull Request actual.
 
-Crea `docs/technical-decisions.md`:
+No modifiques archivos.
 
-```markdown
-# Technical Decisions
-## Decisión 1
-- Contexto:
-- Opciones:
-- Elegida:
-- Motivo:
-- Riesgo:
-- Evidencia:
+Compara:
+- requerimiento original;
+- implementation-plan;
+- código;
+- tests;
+- debugging-notes;
+- code-review;
+- technical-decisions.
 
-## Decisión 2
-...
+Devuelve:
+1. requisitos cubiertos;
+2. requisitos parcialmente cubiertos;
+3. riesgos;
+4. pruebas faltantes;
+5. cambios innecesarios;
+6. decisión que debería tomar el reviewer humano.
 
-## Decisión 3
-...
+No escribas código.
+~~~
 
-## Decisiones humanas
-...
-```
+## 2. Completa docs/technical-decisions.md
+Agrega al final:
 
-Haz commit y push.
+~~~markdown
+## Revisión integral
 
-**Tiempo: 6-8 min.**
+La solución debe considerarse aceptable únicamente después de comprobar el requerimiento, el diff, las pruebas y los riesgos.
+
+### Control humano
+- El código fue revisado.
+- Las pruebas fueron ejecutadas.
+- Las recomendaciones de IA fueron contrastadas.
+- El reviewer humano conserva la decisión final.
+~~~
+
+## 3. Verificación
+~~~bash
+test -f docs/technical-decisions.md
+test -f docs/code-review.md
+pytest -q
+~~~
+
+## 4. Commit
+~~~bash
+git add docs/technical-decisions.md
+git commit -m "docs: complete technical review"
+git push
+~~~
+**Tiempo sugerido: 6–8 min.**
