@@ -1,363 +1,141 @@
-## Step 3: Implementa, compara y decide
+# Step 3 — Implementa, compara y decide
 
-### Teoría: la IA propone, pero la decisión técnica sigue siendo humana
+## Teoría
+El objetivo no es aceptar código generado. El ciclo es:
 
-En desarrollo asistido por IA no basta con generar código. El flujo correcto es:
-
+~~~text
+Plan → IA implementa → diff → pruebas → comparación → decisión humana → evidencia
 ~~~
-Plan → Implementación con IA → Diff → Pruebas → Comparación → Decisión humana → Evidencia
-~~~
 
-En este Step vas a implementar el requerimiento de priority, comparar la solución utilizada con una alternativa y dejar documentada la decisión.
-
-La regla del ejercicio es:
-
-> **Copilot puede implementar y recomendar, pero tú debes revisar el diff, ejecutar las pruebas y decidir qué solución aceptar.**
-
----
-
-## 1. Implementa el requerimiento con Copilot Agent
-
-Abre Copilot Chat en modo **Agent**.
-
-Copia y pega exactamente este prompt:
-
-~~~
+## 1. Prompt exacto para Copilot Agent
+~~~text
 Implementa el requerimiento descrito en docs/implementation-plan.md.
 
-Objetivo:
-Agregar el campo priority a las tareas.
+Agrega priority a Task y TaskCreate.
+Solo permite low, medium y high.
+Haz priority obligatoria al crear.
+POST /tasks debe conservarla.
+GET /tasks debe devolverla.
+Las tareas iniciales deben tener un valor válido.
+Agrega pruebas para valores válidos, valor inválido, ausencia del campo y persistencia en POST.
+Mantén las funcionalidades existentes.
 
-Requisitos obligatorios:
-- Task debe tener un campo priority.
-- priority solo puede aceptar low, medium o high.
-- TaskCreate debe recibir priority.
-- priority debe ser obligatoria al crear una tarea.
-- POST /tasks debe guardar la priority recibida.
-- GET /tasks debe devolver priority.
-- Las tareas iniciales deben tener una priority válida.
-- Agrega las pruebas necesarias para cubrir el nuevo comportamiento.
-- Mantén funcionando las funcionalidades existentes.
-
-Antes de modificar archivos:
-1. inspecciona app/main.py;
-2. inspecciona tests/test_api.py;
-3. revisa docs/implementation-plan.md;
-4. identifica exactamente qué archivos necesitan cambios.
-
-No modifiques funcionalidades que estén fuera del requerimiento.
-
-Después de implementar:
-1. ejecuta pytest -q;
-2. revisa el resultado de las pruebas;
-3. muestra los archivos modificados;
-4. explica brevemente qué cambió en cada archivo;
-5. identifica cualquier decisión técnica que hayas tomado.
-
-No agregues dependencias nuevas salvo que sean estrictamente necesarias.
+Antes de modificar archivos revisa app/main.py, tests/test_api.py y docs/implementation-plan.md.
+Después ejecuta pytest -q y muestra los archivos modificados.
+No agregues dependencias nuevas.
 ~~~
 
-Cuando termine Copilot:
-
+Después ejecuta:
 ~~~bash
 git diff
 pytest -q
 ~~~
 
-**No aceptes automáticamente todos los cambios.** Revisa primero el diff.
+## 2. Crea tests/test_priority.py
+~~~python
+from fastapi.testclient import TestClient
+from app.main import app
 
----
+client = TestClient(app)
 
-## 2. Verifica la implementación
+def test_priority_is_returned_by_get_tasks():
+    response = client.get("/tasks")
+    assert response.status_code == 200
+    assert all(task["priority"] in {"low", "medium", "high"} for task in response.json())
 
-Comprueba que:
+def test_create_task_with_priority():
+    response = client.post("/tasks", json={"title": "Priority test", "priority": "high"})
+    assert response.status_code == 201
+    assert response.json()["priority"] == "high"
 
-- [ ] Task contiene priority.
-- [ ] TaskCreate contiene priority.
-- [ ] solo se aceptan low, medium y high.
-- [ ] priority es obligatoria al crear.
-- [ ] POST /tasks conserva la prioridad.
-- [ ] GET /tasks devuelve la prioridad.
-- [ ] las tareas iniciales tienen una prioridad válida.
-- [ ] las pruebas existentes continúan funcionando.
-- [ ] existen pruebas para el nuevo comportamiento.
+def test_create_task_rejects_invalid_priority():
+    response = client.post("/tasks", json={"title": "Invalid", "priority": "urgent"})
+    assert response.status_code == 422
 
-Ejecuta:
+def test_create_task_requires_priority():
+    response = client.post("/tasks", json={"title": "Missing priority"})
+    assert response.status_code == 422
+~~~
 
+## 3. Crea docs/test-strategy.md
+~~~markdown
+# Test Strategy
+
+## Objetivo
+Comprobar que priority forma parte del contrato de la API sin romper funcionalidades existentes.
+
+## Casos
+| Caso | Resultado esperado |
+|---|---|
+| low | 201 |
+| medium | 201 |
+| high | 201 |
+| urgent | 422 |
+| priority ausente | 422 |
+| GET /tasks | Cada tarea tiene priority |
+| Tests existentes | Todos pasan |
+
+## Ejecución
 ~~~bash
 pytest -q
 ~~~
 
-El resultado debe terminar correctamente.
-
----
-
-## 3. Pide a Copilot una alternativa
-
-Ahora utiliza Copilot para analizar si existe otra forma razonable de implementar la misma regla.
-
-Copia y pega:
-
-~~~
-Analiza la implementación actual de priority en este proyecto.
-
-No modifiques ningún archivo y no escribas código.
-
-Propón una alternativa técnicamente válida para modelar y validar priority.
-
-Compara la implementación actual y la alternativa considerando:
-
-1. claridad;
-2. mantenibilidad;
-3. validación;
-4. extensibilidad;
-5. compatibilidad;
-6. complejidad;
-7. riesgo de errores.
-
-Indica:
-- qué solución está actualmente implementada;
-- qué solución alternativa propones;
-- qué ventajas tiene cada una;
-- qué desventajas tiene cada una;
-- qué aspectos deberían verificarse antes de cambiar de solución.
-
-Termina con:
-- una recomendación técnica;
-- dos aspectos que el desarrollador debe verificar manualmente.
-
-No modifiques ningún archivo.
+## Criterio de salida
+No continuar mientras exista una prueba fallida.
 ~~~
 
----
-
-## 4. Crea el documento de revisión
-
-Crea:
-
-docs/implementation-review.md
-
-**Copia y pega esta plantilla completa:**
-
+## 4. Crea docs/implementation-review.md
 ~~~markdown
 # Implementation Review
 
-## 1. Objetivo
+## Implementación
+La solución implementa priority en los modelos y conserva el dato en los endpoints.
 
-Comparar la implementación actual de priority con una alternativa técnicamente válida y registrar la decisión humana.
+## Alternativa
+La alternativa considerada es validar manualmente dentro de POST /tasks.
 
-El requerimiento es:
-
-- priority debe aceptar low, medium o high;
-- priority es obligatoria al crear;
-- GET /tasks debe devolver priority;
-- las pruebas deben cubrir el nuevo comportamiento;
-- no se deben modificar funcionalidades fuera del alcance.
-
-## 2. Opción implementada
-
-La implementación actual utiliza validación en el modelo de entrada mediante Pydantic.
-
-Características verificadas:
-
-- Task contiene priority.
-- TaskCreate contiene priority.
-- priority es obligatoria.
-- Los valores permitidos son low, medium y high.
-- POST /tasks conserva la prioridad.
-- GET /tasks devuelve la prioridad.
-- Existen pruebas para el nuevo comportamiento.
-
-## 3. Alternativa considerada
-
-Una alternativa sería realizar la validación manualmente dentro del endpoint POST /tasks.
-
-### Ventajas de la alternativa
-
-- La regla de validación queda visible directamente en el endpoint.
-- Puede resultar sencilla en una aplicación pequeña.
-
-### Desventajas de la alternativa
-
-- La validación queda acoplada a la lógica del endpoint.
-- Puede duplicarse si otros endpoints necesitan la misma regla.
-- Existe mayor riesgo de olvidar aplicar la misma validación en otro punto.
-
-## 4. Comparación
-
-| Criterio | Implementación actual | Alternativa |
+## Comparación
+| Criterio | Modelo | Endpoint |
 |---|---|---|
-| Claridad | La regla pertenece al contrato del modelo | La regla queda dentro del endpoint |
-| Mantenibilidad | La validación está centralizada | Puede quedar distribuida |
-| Validación | FastAPI/Pydantic valida la entrada | El endpoint debe validar manualmente |
-| Extensibilidad | Es sencillo ampliar el modelo | Puede requerir más lógica en endpoints |
-| Compatibilidad | Debe verificarse el contrato de entrada | Debe verificarse el comportamiento HTTP |
-| Complejidad | Menor duplicación | Mayor acoplamiento al endpoint |
-| Riesgo | Riesgo principal: modificar el modelo incorrectamente | Riesgo de duplicar u olvidar validaciones |
+| Claridad | Contrato centralizado | Regla dentro de endpoint |
+| Mantenibilidad | Menor duplicación | Mayor riesgo de duplicación |
+| Validación | Automática por modelo | Manual |
+| Extensibilidad | Más fácil reutilizar | Más acoplamiento |
 
-## 5. Revisión de Copilot
+## Decisión humana
+Se mantiene la validación en el modelo porque la regla pertenece al contrato de entrada.
 
-Prompt utilizado:
-
-Analiza la implementación actual de priority y compárala con una alternativa.
-
-### Recomendaciones de Copilot
-
-Registrar aquí las recomendaciones concretas entregadas por Copilot.
-
-### Lo que verifiqué directamente
-
-- Revisé app/main.py.
-- Revisé tests/test_api.py.
-- Revisé el diff.
-- Ejecuté pytest -q.
-
-## 6. Decisión humana
-
-### Opción seleccionada
-
-Mantener la implementación actual basada en validación del modelo.
-
-### Motivo
-
-La regla de valores permitidos forma parte del contrato de entrada de la API y mantenerla en el modelo permite centralizar la validación.
-
-### Recomendación de Copilot que acepté
-
-Mantener la validación asociada al modelo porque reduce duplicación y mantiene el contrato cerca de los datos de entrada.
-
-### Recomendación de Copilot que modifiqué o rechacé
-
-No se aceptó ninguna recomendación que implicara cambios fuera del alcance del requerimiento.
-
-Si Copilot propuso otra recomendación, registrarla aquí y explicar por qué fue modificada o rechazada.
-
-## 7. Evidencia
-
-Comandos ejecutados:
-
-~~~bash
-git diff
-pytest -q
+## Evidencia
+Se revisó el diff y se ejecutó pytest -q.
 ~~~
 
-Resultado:
+## 5. Revisión con Copilot
+~~~text
+Revisa la implementación de priority, tests/test_priority.py y docs/implementation-review.md.
 
-- El diff fue revisado manualmente.
-- Las pruebas fueron ejecutadas.
-- Los cambios fueron contrastados con el requerimiento original.
+No modifiques archivos.
 
-## 8. Conclusión
+Comprueba que:
+1. los requisitos estén cubiertos;
+2. las pruebas correspondan al comportamiento real;
+3. no haya cambios fuera de alcance;
+4. la decisión técnica esté respaldada por evidencia.
 
-La implementación fue revisada con asistencia de IA, pero la decisión final se tomó después de revisar el código, comparar alternativas y ejecutar las pruebas.
-
-La IA fue utilizada como apoyo para analizar y contrastar la solución, no como autoridad final.
+Devuelve hallazgos y verificaciones faltantes. No escribas código.
 ~~~
 
----
-
-## 5. Revisión adicional con Copilot
-
-Después de crear el documento, copia y pega:
-
-~~~
-Revisa la implementación actual de priority y docs/implementation-review.md.
-
-No modifiques ningún archivo.
-
-Comprueba:
-
-1. que la implementación cumple el requerimiento original;
-2. que la comparación entre las dos alternativas es técnicamente coherente;
-3. que no se atribuyan al código comportamientos que realmente no existen;
-4. que las pruebas mencionadas correspondan a pruebas realmente ejecutadas;
-5. que la decisión humana esté respaldada por evidencia.
-
-Devuelve:
-
-## Hallazgos
-Lista los problemas encontrados.
-
-## Evidencia faltante
-Lista cualquier afirmación que todavía deba verificarse.
-
-## Riesgos
-Lista cualquier riesgo técnico importante que no esté documentado.
-
-No escribas código.
-~~~
-
-Revisa la respuesta de Copilot y corrige el documento **solo si verificaste que la observación corresponde al código real**.
-
----
-
-## 6. Ejecuta la validación final
-
-Ejecuta:
-
+## 6. Validación
 ~~~bash
 test -f docs/implementation-review.md
-grep -q "Decisión humana" docs/implementation-review.md
-grep -q "Revisión de Copilot" docs/implementation-review.md
+test -f docs/test-strategy.md
+test -f tests/test_priority.py
 pytest -q
 ~~~
 
-Los cuatro comandos deben terminar correctamente.
-
----
-
-## 7. Revisa el diff final
-
-Ejecuta:
-
+## 7. Commit
 ~~~bash
-git diff --stat
-git diff
-~~~
-
-Comprueba que los cambios están relacionados con:
-
-- priority;
-- sus pruebas;
-- documentación del ejercicio.
-
-Si encuentras cambios no relacionados, elimínalos antes del commit.
-
----
-
-## 8. Commit y push
-
-Cuando hayas terminado:
-
-~~~bash
-git add app tests docs/implementation-review.md
+git add app tests docs
 git commit -m "feat: add task priority"
 git push
 ~~~
-
----
-
-## 9. Evidencia que debes conservar
-
-Al finalizar este Step debes tener:
-
-- implementación funcional de priority;
-- pruebas automatizadas;
-- docs/implementation-review.md;
-- evidencia de pytest -q;
-- comparación entre alternativas;
-- decisión humana documentada.
-
----
-
-## 10. Qué aprendiste
-
-En este Step practicaste el ciclo:
-
-~~~
-IA genera → humano revisa → pruebas verifican → IA compara → humano decide
-~~~
-
-La capacidad importante no es aceptar código generado por IA rápidamente, sino **saber evaluar si la solución propuesta realmente cumple el requerimiento**.
-
-**Tiempo sugerido: 18-22 min.**
+**Tiempo sugerido: 18–22 min.**
