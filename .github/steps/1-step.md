@@ -77,9 +77,9 @@ El objetivo es observar si la explicación de la IA coincide con lo que realment
 
 Crea el archivo `docs/project-analysis.md`.
 
-No necesitas inventar el contenido ni completar campos manualmente. **Copia y pega exactamente el bloque siguiente en el archivo**:
+No necesitas inventar el contenido ni completar campos manualmente. **Copia y pega exactamente todo el bloque siguiente en el archivo**.
 
-```markdown
+````markdown
 # Project Analysis
 
 ## 1. Arquitectura
@@ -165,7 +165,9 @@ La respuesta de Copilot se utilizó como apoyo para comprender el proyecto y se 
 ## 9. Pregunta técnica abierta
 
 ¿Qué cambios serían necesarios para agregar un nuevo campo `priority` a las tareas sin romper los endpoints ni las pruebas existentes?
-```
+````
+
+> **Importante:** el bloque anterior utiliza cuatro acentos graves (````) para delimitar el archivo completo porque dentro de `project-analysis.md` existen bloques Markdown de tres acentos graves. Debes copiar el contenido **desde `# Project Analysis` hasta la última línea de la pregunta**, sin copiar los cuatro acentos graves externos.
 
 Después de pegarlo, guarda el archivo.
 
