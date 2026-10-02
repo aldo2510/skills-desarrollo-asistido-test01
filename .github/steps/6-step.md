@@ -1,35 +1,68 @@
-## Step 6: Prepara el Pull Request
+# Step 6 — Revisa el cambio antes del merge
 
-### Teoría
-El Pull Request convierte un cambio local en una unidad revisable. La descripción debe permitir que otra persona entienda problema, solución, evidencia y riesgos sin reconstruir la historia.
+## Teoría
+El review asistido por IA debe buscar defectos, no reemplazar el juicio del reviewer.
 
-### Copia y pega
-```text
-Genera una descripción de Pull Request usando únicamente evidencia del repositorio.
-Incluye problema, solución, archivos modificados, pruebas, riesgos, rollback y decisiones humanas.
-No inventes resultados.
-```
+## 1. Prompt
+~~~text
+Actúa como reviewer senior del Pull Request actual.
 
-Crea `docs/pr-description.md`:
+Revisa el diff contra main.
 
-```markdown
-# Pull Request
-## Problema
-...
-## Solución
-...
-## Archivos modificados
-- ...
-## Pruebas
-- ...
-## Riesgos
-- ...
-## Rollback
-...
-## Decisiones humanas
-...
-```
+No modifiques archivos.
 
-Crea una rama, haz commit y push y abre un PR contra `main`. **No hagas merge.**
+Busca:
+- errores funcionales;
+- regresiones;
+- validaciones incompletas;
+- pruebas faltantes;
+- cambios fuera de alcance;
+- problemas de mantenibilidad;
+- riesgos de compatibilidad.
 
-**Tiempo: 8-10 min.**
+Para cada hallazgo indica archivo, problema, evidencia y severidad.
+Si no encuentras problemas, explica qué verificaste.
+~~~
+
+## 2. Crea docs/code-review.md
+~~~markdown
+# Code Review
+
+## Alcance
+Se revisó el diff del Pull Request contra main.
+
+## Checklist
+- [x] Requerimiento de priority revisado.
+- [x] Validación de entrada revisada.
+- [x] Endpoints revisados.
+- [x] Pruebas revisadas.
+- [x] Cambios fuera de alcance revisados.
+- [x] Regresión de la suite revisada.
+
+## Hallazgos
+La respuesta de Copilot debe contrastarse con el código real antes de registrar un hallazgo como válido.
+
+## Evidencia
+~~~bash
+git diff main...HEAD
+pytest -q
+~~~
+
+## Decisión
+Solo aceptar cambios después de revisar evidencia.
+~~~
+
+## 3. Verificación
+~~~bash
+test -f docs/code-review.md
+test -f docs/pr-description.md
+pytest -q
+~~~
+
+## 4. Commit
+~~~bash
+git add docs/code-review.md
+git commit -m "docs: record ai code review"
+git push
+~~~
+**Tiempo sugerido: 8–10 min.**
