@@ -41,37 +41,54 @@ pytest -q
 
 Resultado esperado: las pruebas existentes pasan.
 
-### 3. Compara el análisis con Copilot
+### 3. Compara tu análisis con Copilot
 
-Ahora utiliza Copilot para comprobar si tu comprensión del proyecto coincide con la interpretación de la IA.
+Ahora utiliza Copilot para contrastar tu comprensión del proyecto con la interpretación de la IA.
 
-Copia y pega este prompt en Copilot Chat:
+**No tienes que inventar ningún prompt.** Copia y pega exactamente el siguiente bloque en **Copilot Chat**:
 
 ```text
-Analiza este proyecto FastAPI como un ingeniero senior.
+Analiza el proyecto FastAPI actual como un ingeniero senior.
 
-No modifiques ningún archivo.
+IMPORTANTE:
+- No modifiques ningún archivo.
+- No escribas código.
+- No propongas cambios.
+- Basa tu análisis únicamente en los archivos que realmente existen en este repositorio.
+- Si no puedes confirmar algo en el código, indícalo como "No confirmado".
 
-Resume únicamente:
-1. La responsabilidad de app/main.py.
-2. Los endpoints disponibles.
-3. Los modelos Task y TaskCreate.
-4. Cómo se almacenan las tareas.
-5. Cómo funcionan las pruebas.
-6. Dos riesgos técnicos que deberían considerarse antes de modificar el proyecto.
+Analiza únicamente estos puntos:
 
-No escribas código y no propongas cambios.
+1. ¿Cuál es la responsabilidad de app/main.py?
+2. ¿Qué endpoints existen? Indica método HTTP, ruta, entrada y respuesta.
+3. ¿Qué representan los modelos Task y TaskCreate y qué campos tiene cada uno?
+4. ¿Cómo se almacenan actualmente las tareas?
+5. ¿Cómo se ejecutan las pruebas y qué herramienta utilizan?
+6. ¿Qué ocurre paso a paso cuando se ejecuta POST /tasks?
+7. ¿Qué ocurre paso a paso cuando se ejecuta PATCH /tasks/{task_id}?
+8. Indica dos riesgos o decisiones técnicas que deberían conocerse antes de modificar el proyecto.
 
-Al final, indica:
-- 3 afirmaciones que debería verificar directamente en el repositorio.
-- 1 posible interpretación que podría ser incorrecta.
+Al final incluye exactamente estas dos secciones:
+
+## Verificaciones necesarias
+
+Indica 3 afirmaciones de tu análisis que deberían verificarse directamente revisando los archivos del repositorio.
+
+## Posible interpretación incorrecta
+
+Indica 1 afirmación que podría ser incorrecta o que necesite confirmación adicional.
+
+No generes archivos y no realices cambios en el repositorio.
 ```
 
-Lee la respuesta de Copilot y compárala con el código real del repositorio.
+Después de ejecutar el prompt:
 
-**No necesitas copiar la respuesta de Copilot al documento.**
+1. Lee la respuesta de Copilot.
+2. Compara sus afirmaciones con `app/main.py`, `tests/test_api.py` y `requirements.txt`.
+3. No necesitas copiar la respuesta de Copilot al repositorio.
+4. El objetivo es comprobar que puedes **usar la IA para acelerar el análisis sin aceptar automáticamente sus conclusiones**.
 
-El objetivo es observar si la explicación de la IA coincide con lo que realmente existe en el código.
+> **Importante:** Copilot participa en este Step como herramienta de análisis. Sin embargo, el resultado del laboratorio no depende de que Copilot produzca exactamente una respuesta determinada: la fuente definitiva sigue siendo el código del repositorio.
 
 ### 4. Crea el documento
 
@@ -189,23 +206,6 @@ git push
 ```
 
 **Resultado del Step:** tendrás un análisis documentado del proyecto y habrás comprobado que una explicación generada por IA debe contrastarse con el código fuente antes de aceptarla como válida.
-
-### 5. Verificación final
-
-Ejecuta:
-
-```bash
-test -f docs/project-analysis.md
-pytest -q
-```
-
-Si ambos comandos terminan correctamente, haz commit y push:
-
-```bash
-git add docs/project-analysis.md
-git commit -m "docs: analyze project structure"
-git push
-```
 
 > **Objetivo del Step:** aprender a verificar una explicación de IA contra el código real. El documento ya contiene una respuesta base para que puedas avanzar; puedes contrastarla con Copilot, pero no necesitas esperar a que Copilot genere el contenido.
 
