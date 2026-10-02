@@ -1,0 +1,60 @@
+name: Step 5
+
+on:
+  push:
+    paths: ["docs/**","tests/**","app/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+  pull-requests: read
+
+env:
+  STEP_FILE: ".github/steps/6-step.md"
+
+jobs:
+  find_exercise:
+    if: ${{ !github.event.repository.is_template }}
+    uses: skills/exercise-toolkit/.github/workflows/find-exercise-issue.yml@v0.9.1
+  check:
+    needs: [find_exercise]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - run: |
+          test -f docs/debugging-notes.md
+          test -f tests/test_empty_tasks.py
+          python -m pip install -r requirements.txt
+          pytest -q
+  next:
+    needs: [find_exercise, check]
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_REPOSITORY: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ needs.find_exercise.outputs.issue-number }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: skills/exercise-toolkit
+          path: exercise-toolkit
+          ref: v0.9.1
+      - uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/step-finished-prepare-next-step.md
+          vars: |
+            next_step_number: 6
+      - uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: ${{ env.STEP_FILE }}
+      - run: |
+          gh workflow disable "${{ github.workflow }}"
+          gh workflow enable "Step 6"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,73 @@
+name: Step 2
+
+on:
+  push:
+    paths:
+      - "docs/implementation-plan.md"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  actions: write
+  issues: write
+
+env:
+  STEP_FILE: ".github/steps/3-step.md"
+
+jobs:
+  find_exercise:
+    if: ${{ !github.event.repository.is_template }}
+    name: Find Exercise Issue
+    uses: skills/exercise-toolkit/.github/workflows/find-exercise-issue.yml@v0.9.1
+
+  check_step_work:
+    name: Validate implementation plan
+    needs: [find_exercise]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - name: Validate plan
+        run: |
+          test -f docs/implementation-plan.md
+          grep -Eiq 'low|medium|high' docs/implementation-plan.md
+          grep -Eiq 'POST /tasks|GET /tasks|Task' docs/implementation-plan.md
+          grep -Eiq 'criterios|aceptaci' docs/implementation-plan.md
+          grep -Eiq 'riesgo|rollback' docs/implementation-plan.md
+
+  post_next_step_content:
+    name: Post Step 3
+    needs: [find_exercise, check_step_work]
+    runs-on: ubuntu-latest
+    env:
+      ISSUE_REPOSITORY: ${{ github.repository }}
+      ISSUE_NUMBER: ${{ needs.find_exercise.outputs.issue-number }}
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/checkout@v6
+        with:
+          repository: skills/exercise-toolkit
+          path: exercise-toolkit
+          ref: v0.9.1
+      - uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/step-finished-prepare-next-step.md
+          vars: |
+            next_step_number: 3
+      - uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: ${{ env.STEP_FILE }}
+      - uses: GrantBirki/comment@v2.1.1
+        with:
+          repository: ${{ env.ISSUE_REPOSITORY }}
+          issue-number: ${{ env.ISSUE_NUMBER }}
+          file: exercise-toolkit/markdown-templates/step-feedback/watching-for-progress.md
+      - name: Enable Step 3
+        run: |
+          gh workflow disable "${{ github.workflow }}"
+          gh workflow enable "Step 3"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
